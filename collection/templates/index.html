@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}
+Query the Hivemind
+{% endblock title %}
+
+{% block content %}
+<p><h1>Query the Reddit Hive</h1></p>
+{% if corps != None %}
+    {% for corp in corps %}
+    {{ corp }}<br>
+    {% endfor %}
+{% else %}
+<form role="form" action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+{% endif %}
+{% endblock content %}

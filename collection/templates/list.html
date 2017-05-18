@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}
+List - {{ block.super }}
+{% endblock title %}
+
+{% block content %}
+<p><h1>Past Queries</h1></p>
+{% if corps != null %}
+{% for corp in corps %}
+<a href="{% url 'thing_detail' slug=corp %}">
+    <p>{{ corp }}</p>
+</a>
+{% endfor %}
+{% endif %}
+{% endblock content %}

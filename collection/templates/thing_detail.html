@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}
+Details - {{ block.super }}
+{% endblock title %}
+
+{% block content %}
+<p><h1>{{ corp }}</h1></p>
+{% if corps != null %}
+{% for corp in corps %}
+{{ corp }}<br>
+{% endfor %}
+{% endif %}
+{% endblock content %}
+
+
+
