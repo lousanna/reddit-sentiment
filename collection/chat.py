@@ -25,6 +25,7 @@ from nltk.corpus import movie_reviews
 from praw.models import MoreComments
 from unidecode import unidecode
 
+matplotlib.use('Agg')
 markov_corp = dict()
 company_rank = defaultdict(int)
 upvote_list = []
