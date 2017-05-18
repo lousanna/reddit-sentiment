@@ -30,7 +30,6 @@ def index(request):
         form = form_class(request.POST)
         if form.is_valid():
             corps = scanComp(form.cleaned_data['name'])
-            form.save()
     # otherwise just create the form
     else:
         form = form_class()
