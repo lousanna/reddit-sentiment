@@ -17,7 +17,9 @@ https://checkhivemind.herokuapp.com/
   4 = List companies                                          
   5 = Add company                                             
   6 = Remove company                                          
-  7 = Quit     
+  7 = Input Survey Data for Test Evaluation
+  8 = Graph Test Evaluation
+  9 = Quit
 
 ## Corpora Locations
 collection/tmp/companies: The list of company names to scan
