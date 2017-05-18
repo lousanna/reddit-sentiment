@@ -13,6 +13,13 @@ import re
 import random
 import nltk
 import shutil
+import csv
+import numpy
+import pandas as pd
+import seaborn as sns
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from collections import defaultdict
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.classify import util
@@ -336,7 +343,47 @@ def eval(filename):
                         
 def evaluate():
 
-    print "Unsupported feature. Please use reddit_command.py instead for graphing.\n"
+    data = []
+    comp_names = ['Company', 'Model', 'Human']
+    data.append(comp_names)
+    company_name = ""
+    for file in os.listdir('tmp/statistic'):
+        ind = file.find(".score")
+        if file[:ind] != company_name:
+            company_name = file[:ind]
+            dataOne = []
+            dataOne.append(company_name)
+        if file.endswith(".score_compute") or file.endswith(".score_human"):
+            fullpath = os.path.join('tmp/statistic', file)
+            input_file = open(fullpath, 'r')
+            toAdd = ""
+            for line in input_file:
+                toAdd = line
+            input_file.close()
+            dataOne.append(toAdd.strip())
+        if file.endswith(".score_human"):
+            data.append(dataOne)
+                        
+    b = open('tmp/test.csv', 'w+')
+    a = csv.writer(b)
+    a.writerows(data)
+    b.close()
+    print "Created CSV\n"
+    
+    test = pd.read_csv('tmp/test.csv', sep=',')
+    sns.set_style("darkgrid")
+    fig, ax = plt.subplots()
+    sns.pointplot(x="Company", y="Human", data=test, ax=ax, color='b')
+    sns.pointplot(x="Company", y="Model", data=test, ax=ax, color='r')
+    ax.set(xlabel='Companies', ylabel='Compound Sentiment')
+    ax.set_title('Reddit Sentiment as Judged by Human and Model')
+    ax.legend(handles=ax.lines[::len(test)+1], labels=["Human","Model"])
+                        
+    ax.set_xticklabels([t.get_text() for t in ax.get_xticklabels()])
+
+    plt.gcf().autofmt_xdate()
+    fig.savefig('tmp/graph.png')
+    sns.plt.show()
 
 
 
