@@ -73,20 +73,20 @@ def word_split(sentence):
     return re.split(re.compile(r"\s+"), sentence)
 
 def addCompany(name):
-    in_comp = open('companies', 'r')
+    in_comp = open('tmp/companies', 'r')
     for line in in_comp:
         if line.lower().strip() == name.lower().strip():
             print "Already present"
             return "Already present"
     in_comp.close()
-    with open("companies", "a") as myfile:
+    with open("tmp/companies", "a") as myfile:
         myfile.write(name + "\n")
     myfile.close()
     print "Added "+ name +"\n"
     return "Added "+ name +"\n"
 
 def listCompanies():
-    in_comp = open('companies', 'r')
+    in_comp = open('tmp/companies', 'r')
     c = 1
     for line in in_comp:
         print str(c) + ". " + line
@@ -95,7 +95,7 @@ def listCompanies():
     return c-1
                         
 def remCompany(name):
-    in_comp = open('companies', 'r')
+    in_comp = open('tmp/companies', 'r')
     list = []
     c = 0
     found = False
@@ -107,7 +107,7 @@ def remCompany(name):
             found = True
     in_comp.close()
                         
-    in_comp = open('companies', 'w')
+    in_comp = open('tmp/companies', 'w')
     for i in range(c):
         in_comp.write(list[i])
     in_comp.close()
@@ -149,7 +149,7 @@ def getQuery(update):
                         client_secret=client_secret.strip(),
                         user_agent='LousBot test')
                         
-    in_comp = open('companies', 'r')
+    in_comp = open('tmp/companies', 'r')
     count_comp = 0
     companies = []
     for line in in_comp:
@@ -167,7 +167,7 @@ def getQuery(update):
                         msg = companies[temp_count]
                         temp_count += 1
                         
-                        if os.path.isfile("raw/" + getInput(msg) + '.raw') == False or update == True:
+                        if os.path.isfile("tmp/raw/" + getInput(msg) + '.raw') == False or update == True:
                             print "Analyzing " + getInput(msg)
                             getRedditPosts(reddit, getInput(msg))
 
@@ -194,14 +194,14 @@ def scanComp(msg):
                         client_secret=client_secret.strip(),
                         user_agent='LousBot test')
                         
-    if os.path.isfile("raw/" + query + '.raw') == False:
+    if os.path.isfile("tmp/raw/" + query + '.raw') == False:
         print "Analyzing " + query
         getRedditPosts(reddit, query)
                         
     curr = getScore(query, 0, 0, False)
 
     stringRet = []
-    input_file = open("scores/" + query + '.score', 'r')
+    input_file = open("tmp/scores/" + query + '.score', 'r')
     for line in input_file:
         stringRet.append(line)
     input_file.close()
@@ -234,15 +234,15 @@ def get_word_features(wordlist):
     return word_features
                         
 def getScore(query, temp_count, count_comp, update):
-    if os.path.isfile("scores/" + query + '.score') == True and update == False:
-        input_file = open("scores/" + query + '.score', 'r')
+    if os.path.isfile("tmp/scores/" + query + '.score') == True and update == False:
+        input_file = open("tmp/scores/" + query + '.score', 'r')
         toRet = ""
         for line in input_file:
             toRet = line
         input_file.close()
         return float(line)
 
-    input_file = open("raw/" + query + '.raw', 'r')
+    input_file = open("tmp/raw/" + query + '.raw', 'r')
     count_lines = 0
     corp = []
     upvote_list = []
@@ -256,7 +256,7 @@ def getScore(query, temp_count, count_comp, update):
         curr_ind+=1
     input_file.close()
 
-    target = open("scores/" + query + ".score", 'w+')
+    target = open("tmp/scores/" + query + ".score", 'w+')
     sid = SentimentIntensityAnalyzer()
     sumTot = 0
     sumPos = 0
@@ -298,7 +298,7 @@ def getScore(query, temp_count, count_comp, update):
 def getRedditPosts(reddit, query):
     all = reddit.subreddit("all")
 
-    target = open("raw/" + query + ".raw", 'w+')
+    target = open("tmp/raw/" + query + ".raw", 'w+')
 
     for i in all.search(query + " company", sort='top', syntax='cloudsearch', limit=5):
             link = i.url
@@ -322,7 +322,7 @@ def main():
     nltk.download('vader_lexicon', '../nltk_data')
     nltk.download('movie_reviews', '../nltk_data')
     nltk.data.path.append('../nltk_data')
-    in_comp = open('companies', 'r')
+    in_comp = open('tmp/companies', 'r')
         
 
     menu = \
