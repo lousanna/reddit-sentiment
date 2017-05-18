@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 {% block title %}
 About - {{ block.super }}
 {% endblock title %}
 
 {% block content %}
 <p><h1>About</h1></p>
-<p>
-Computes general sentiment values representing the Reddit hivemind's attitude towards company X.</p>
+<p>Computes general sentiment values representing the Reddit hivemind's attitude towards company X.</p>
+<img src= "{% static 'images/graph.png' %}" />
 {% endblock content %}
+

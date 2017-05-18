@@ -11,3 +11,5 @@ requests==2.14.2
 requests-oauthlib==0.8.0
 Unidecode==0.4.20
 psycopg2==2.6.1
+pandas==0.20.1
+seaborn==0.7.1

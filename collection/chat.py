@@ -13,6 +13,10 @@ import re
 import random
 import nltk
 import shutil
+import csv
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from collections import defaultdict
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.classify import util
@@ -26,6 +30,11 @@ company_rank = defaultdict(int)
 upvote_list = []
 corp = []
 companies = []
+client_id = 'cDR30pGXp_dJgQ'
+client_secret = 'LR1-X94V6H9Xo6YA3KMdoA2JMVA'
+reddit = praw.Reddit(client_id=client_id.strip(),
+                     client_secret=client_secret.strip(),
+                     user_agent='LousBot test')
 
 lastResort = ["10/10", "Instructions unclear", "This.", "kek", "I am a simple man.", "Upvoted.", "Can confirm", "THIS", "Sigh", "ssh bby is ok", "hnnnng"]
 
@@ -142,12 +151,6 @@ def clearScores():
 
 def getQuery(update):
     quit = False
-    client_id = 'cDR30pGXp_dJgQ'
-    client_secret = 'LR1-X94V6H9Xo6YA3KMdoA2JMVA'
-                        
-    reddit = praw.Reddit(client_id=client_id.strip(),
-                        client_secret=client_secret.strip(),
-                        user_agent='LousBot test')
                         
     in_comp = open('tmp/companies', 'r')
     count_comp = 0
@@ -187,13 +190,7 @@ def getQuery(update):
                         
 def scanComp(msg):
     query = getInput(msg)
-    client_id = 'cDR30pGXp_dJgQ'
-    client_secret = 'LR1-X94V6H9Xo6YA3KMdoA2JMVA'
-                        
-    reddit = praw.Reddit(client_id=client_id.strip(),
-                        client_secret=client_secret.strip(),
-                        user_agent='LousBot test')
-                        
+
     if os.path.isfile("tmp/raw/" + query + '.raw') == False:
         print "Analyzing " + query
         getRedditPosts(reddit, query)
@@ -209,7 +206,6 @@ def scanComp(msg):
     addCompany(msg)
 
     return stringRet
-
                     
 def extract_features(document):
     document_words = set(document)
@@ -294,6 +290,99 @@ def getScore(query, temp_count, count_comp, update):
                         
     target.write(str(sumComp/sumTot))
     return sumComp/sumTot
+                        
+def eval(filename):
+
+    print "Input your judgements as floats, where most negative sentiment is -4 and most positive sentiment is 4.\n"
+
+    filename = filename + ".score"
+    if os.path.isfile('tmp/scores/' + filename):
+            in_comp = open('tmp/scores/' + filename, 'r')
+            count_comp = 0
+            targetc = open('tmp/statistic/' + filename + "_compute", 'w+')
+            targeth = open('tmp/statistic/' + filename + "_human", 'w+')
+            currLine = ""
+            sum = 0
+            upvTot = 0
+            for line in in_comp:
+                if count_comp % 6 == 0: #
+                    currLine = line
+                elif (count_comp-1) % 6 == 0:
+                    print currLine
+                    if line.find(': ') == -1:
+                        targetc.write(line)
+                        print "Model: " + line
+                        targeth.write(str(sum/upvTot))
+                        print "Human: " + str(sum/upvTot)
+                    else:
+                        while True:
+                            try:
+                                x = raw_input("Input your judgement [-4, 4]: ")
+                                indUp = line.find(': ')
+                                upv = int(line[indUp+2:].strip())
+                                calc = upv*float(x)
+                            except ValueError:
+                                print("Sorry, I didn't understand that.")
+                                continue
+                            else:
+                                break
+                        upvTot += abs(upv)
+                        sum += calc
+                        targeth.write(currLine + str(calc) + "\n")
+                elif (count_comp+1) % 6 == 0:
+                    colon = line.find(': ')
+                    targetc.write(currLine + str(line)[colon+2:])
+                count_comp += 1
+
+            in_comp.close()
+            targetc.close()
+            targeth.close()
+                        
+def evaluate():
+
+    data = []
+    comp_names = ['Company', 'Model', 'Human']
+    data.append(comp_names)
+    company_name = ""
+    for file in os.listdir('tmp/statistic'):
+        ind = file.find(".score")
+        if file[:ind] != company_name:
+            company_name = file[:ind]
+            dataOne = []
+            dataOne.append(company_name)
+        if file.endswith(".score_compute") or file.endswith(".score_human"):
+            fullpath = os.path.join('tmp/statistic', file)
+            input_file = open(fullpath, 'r')
+            toAdd = ""
+            for line in input_file:
+                toAdd = line
+            input_file.close()
+            dataOne.append(toAdd.strip())
+        if file.endswith(".score_human"):
+            data.append(dataOne)
+                        
+    b = open('tmp/test.csv', 'w+')
+    a = csv.writer(b)
+    a.writerows(data)
+    b.close()
+    print "Created CSV\n"
+    
+    test = pd.read_csv('tmp/test.csv', sep=',')
+    sns.set_style("darkgrid")
+    fig, ax = plt.subplots()
+    sns.pointplot(x="Company", y="Human", data=test, ax=ax, color='b')
+    sns.pointplot(x="Company", y="Model", data=test, ax=ax, color='r')
+    ax.set(xlabel='Companies', ylabel='Compound Sentiment')
+    ax.set_title('Reddit Sentiment as Judged by Human and Model')
+    ax.legend(handles=ax.lines[::len(test)+1], labels=["Human","Model"])
+                        
+    ax.set_xticklabels([t.get_text() for t in ax.get_xticklabels()])
+
+    plt.gcf().autofmt_xdate()
+    fig.savefig('tmp/graph.png')
+    sns.plt.show()
+
+
 
 def getRedditPosts(reddit, query):
     all = reddit.subreddit("all")
@@ -333,12 +422,14 @@ def main():
                         "                                                            \n"\
                         "  OPTIONS:                                                    \n"\
                         "  1 = Fast scan using last updated data                       \n"\
-                        "  2 = Medium scan to recalc scores from corpora               \n"\
-                        "  3 = Scan all companies from scratch (~15 min)               \n"\
+                        "  2 = Medium scan to re-calc scores from corpora              \n"\
+                        "  3 = Scan all companies from scratch (~30 sec/company)       \n"\
                         "  4 = List companies                                          \n"\
                         "  5 = Add company                                             \n"\
                         "  6 = Remove company                                          \n"\
-                        "  7 = Quit                                                    \n"\
+                        "  7 = Input Survey Data for Test Evaluation                   \n"\
+                        "  8 = Graph Test Evaluation                                   \n"\
+                        "  9 = Quit                                                    \n"\
                         "                                                              \n"\
                         "============================================================\n".format()
     while True:
@@ -358,6 +449,11 @@ def main():
         elif option == "6":
             remCompany(raw_input("Enter Name: "))
         elif option == "7":
+            listCompanies()
+            eval(raw_input("Enter Company to Eval: "))
+        elif option == "8":
+            evaluate()
+        elif option == "9":
             exit(0)
         else:
             sys.stderr.write("Input seems not right, try again\n")
