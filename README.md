@@ -28,4 +28,8 @@ collection/tmp/raw: The raw comments & upvotes pulled from reddit
 
 collection/tmp/scores: Computed sentiment scores stored for quick retrieval
 
+collection/tmp/statistic: Contains final scores by human survey and model
+
+collection/tmp/graph.png: Evaluation graph based on the data from /tmp/statistic
+
 
