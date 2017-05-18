@@ -320,8 +320,9 @@ def getRedditPosts(reddit, query):
 
 def main():
 
-    nltk.download('vader_lexicon')
-    nltk.download('movie_reviews')
+    nltk.download('vader_lexicon', '../nltk_data')
+    nltk.download('movie_reviews', '../nltk_data')
+    nltk.data.path.append('../nltk_data')
     in_comp = open('companies', 'r')
         
 
