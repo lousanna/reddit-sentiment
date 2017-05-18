@@ -16,6 +16,8 @@ import shutil
 import csv
 import pandas as pd
 import seaborn as sns
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -25,7 +27,6 @@ from nltk.corpus import movie_reviews
 from praw.models import MoreComments
 from unidecode import unidecode
 
-matplotlib.use('Agg')
 markov_corp = dict()
 company_rank = defaultdict(int)
 upvote_list = []
