@@ -14,6 +14,7 @@ import random
 import nltk
 import shutil
 import csv
+import numpy
 import pandas as pd
 import seaborn as sns
 import matplotlib
