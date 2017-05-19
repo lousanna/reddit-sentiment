@@ -170,10 +170,6 @@ def getQuery(update):
                             print "Analyzing " + getInput(msg)
                             getRedditPosts(reddit, getInput(msg))
 
-
-                        # Build the model.
-                        #text_model = markovify.Text(text)
-                        
                         company_rank[msg] = getScore(getInput(msg), temp_count, count_comp, update)
                         
     count_t = 1
@@ -194,15 +190,58 @@ def scanComp(msg):
     curr = getScore(query, 0, 0, False)
 
     stringRet = []
+    ctemp = 0
     input_file = open("tmp/scores/" + query + '.score', 'r')
     for line in input_file:
         stringRet.append(line)
+        ctemp+=1
     input_file.close()
 
+    if len(stringRet) < 3:
+        return "No Data Found :("
     addCompany(msg)
+    toRet = []
+    toRet.append(getOverall(stringRet[ctemp-1]))
+    fin = stringRet[ctemp-2]
+    negind = fin.find("Neg:")
+    neuind = fin.find("Neu:")
+    posind = fin.find("Pos:")
+    compind = fin.find("Comp:")
+    toRet.append(fin[negind:neuind])
+    toRet.append(fin[neuind:posind])
+    toRet.append(fin[posind:compind])
+    toRet.append(fin[compind:])
+    return toRet
 
+def seeComments(msg):
+    query = getInput(msg)
+                        
+    if os.path.isfile("tmp/raw/" + query + '.raw') == False:
+        print "Analyzing " + query
+        getRedditPosts(reddit, query)
+
+    stringRet = []
+    ctemp = 0
+    input_file = open("tmp/raw/" + query + '.raw', 'r')
+    for line in input_file:
+        if ctemp % 2 ==0:
+            stringRet.append(str(ctemp+1) + ". " + line)
+        ctemp+=1
+    input_file.close()
+                        
     return stringRet
-                    
+
+def getOverall(msg):
+    query = float(msg)
+    if query > 0.5:
+        return "Very Positive"
+    elif query > 0.1:
+        return "Positive"
+    elif query > -0.1:
+        return "Negative"
+    else:
+        return "Very Negative"
+
 def extract_features(document):
     document_words = set(document)
     features = {}

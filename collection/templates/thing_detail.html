@@ -7,9 +7,18 @@ Details - {{ block.super }}
 <p><h1>{{ corp }}</h1></p>
 {% if corps != null %}
 {% for corp in corps %}
-{{ corp }}<br>
+<p><i>{{ corp }}</p></i>
 {% endfor %}
 {% endif %}
+
+<p></p><p></p><h1>See Mentions:</h1><p></p>
+{% if comments != null %}
+{% for comment in comments %}
+<p>{{ comment }}</p>
+{% endfor %}
+{% endif %}
+
+
 {% endblock content %}
 
 

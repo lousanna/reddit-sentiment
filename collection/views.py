@@ -8,6 +8,7 @@ import chat
 from chat import getQuery
 from chat import addCompany
 from chat import scanComp
+from chat import seeComments
 
 def list(request):
     corps = Corp.objects.all()
@@ -22,7 +23,8 @@ def index(request):
     # set the form we're using
     form_class = CorpForm
     corps = None
-    
+    corp = None
+    comments = None
     # if we're coming to this view from a submitted form
     if request.method == 'POST':
         # grab the data from the submitted form and apply to
@@ -30,6 +32,8 @@ def index(request):
         form = form_class(request.POST)
         if form.is_valid():
             corps = scanComp(form.cleaned_data['name'])
+            corp = form.cleaned_data['name']
+            comments = seeComments(corp)
     # otherwise just create the form
     else:
         form = form_class()
@@ -38,6 +42,8 @@ def index(request):
     return render(request, 'index.html', {
                   'corps': corps,
                   'form': form,
+                  'corp': corp,
+                  'comments': comments,
                   }, context_instance=RequestContext(request))
 
 def thing_detail(request, slug):
@@ -45,9 +51,11 @@ def thing_detail(request, slug):
     firstind = slug.find(' ')
     corp = slug[firstind+1:lastind]
     corps = scanComp(corp)
+    comments = seeComments(corp)
     
     # and pass to the template
     return render(request, 'thing_detail.html', {
                   'corps': corps,
                   'corp': corp,
+                  'comments': comments,
                   })

@@ -4,11 +4,21 @@ Query the Hivemind
 {% endblock title %}
 
 {% block content %}
+{% if corp != None %}
+<p><h1>{{ corp }}</h1></p>
+{% else %}
 <p><h1>Query the Reddit Hive</h1></p>
+{% endif %}
 {% if corps != None %}
     {% for corp in corps %}
-    {{ corp }}<br>
+    <p><i>{{ corp }}</p></i>
     {% endfor %}
+    <p></p><p></p><h1>See Mentions:</h1><p></p>
+    {% if comments != null %}
+    {% for comment in comments %}
+    <p>{{ comment }}</p>
+    {% endfor %}
+    {% endif %}
 {% else %}
 <form role="form" action="" method="post">
     {% csrf_token %}
